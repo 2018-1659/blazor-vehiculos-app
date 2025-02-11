@@ -1,0 +1,51 @@
+.vehiculo-card {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 15px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.vehiculo-card:hover {
+    transform: translateY(-3px);
+}
+
+.vehiculo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vehiculo-info h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+}
+
+.modelo {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+}
+
+.año {
+    background-color: #3498db;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+}
+
+.btn-eliminar {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-eliminar:hover {
+    color: #c0392b;
+} 

@@ -1,0 +1,32 @@
+@using blazor_vehiculos_app.Models
+
+<div class="vehiculo-card">
+    <div class="vehiculo-header">
+        <div class="vehiculo-info">
+            <h3>@Vehiculo.Brand</h3>
+            <span class="modelo">@Vehiculo.Model</span>
+            <span class="año">@Vehiculo.Year</span>
+        </div>
+        <div class="vehiculo-actions">
+            <button class="btn-eliminar" @onclick="EliminarVehiculo">
+                <i class="bi bi-trash3-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Vehicle Vehiculo { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<int> OnEliminar { get; set; }
+
+    private async Task EliminarVehiculo()
+    {
+        if (OnEliminar.HasDelegate)
+        {
+            await OnEliminar.InvokeAsync(Vehiculo.Id);
+        }
+    }
+} 

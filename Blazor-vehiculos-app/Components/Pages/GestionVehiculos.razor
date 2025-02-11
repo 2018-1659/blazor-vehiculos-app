@@ -1,0 +1,180 @@
+@page "/vehiculos"
+@using blazor_vehiculos_app.Models
+@using blazor_vehiculos_app.Services
+@inject VehicleService VehicleService
+@rendermode InteractiveServer
+
+<PageTitle>Vehículos - Gestión de Vehículos</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-car-front-fill text-primary"></i>
+        Mi Colección de Vehículos
+    </h1>
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="bi bi-plus-circle-fill"></i> Nuevo Vehículo
+    </button>
+</div>
+
+@if (mostrarFormulario)
+{
+    <div class="card mb-4 @(formularioVisible ? "show" : "")">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Agregar Nuevo Vehículo</h5>
+            <button class="btn-close" @onclick="OcultarFormulario"></button>
+        </div>
+        <div class="card-body">
+            <EditForm Model="@newVehicle" OnValidSubmit="HandleValidSubmit" FormName="vehicle-form">
+                <DataAnnotationsValidator />
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputText id="brand" class="form-control" @bind-Value="newVehicle.Brand" placeholder="Marca" />
+                            <label for="brand">Marca</label>
+                            <ValidationMessage For="@(() => newVehicle.Brand)" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputText id="model" class="form-control" @bind-Value="newVehicle.Model" placeholder="Modelo" />
+                            <label for="model">Modelo</label>
+                            <ValidationMessage For="@(() => newVehicle.Model)" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputNumber id="year" class="form-control" @bind-Value="newVehicle.Year" placeholder="Año" />
+                            <label for="year">Año</label>
+                            <ValidationMessage For="@(() => newVehicle.Year)" class="text-danger" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle-fill"></i> Guardar Vehículo
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+}
+else if (vehicles.Any())
+{
+    <div class="row g-4">
+        @foreach (var vehicle in vehicles)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">@vehicle.Brand</h5>
+                            <span class="badge bg-secondary">@vehicle.Year</span>
+                        </div>
+                        <p class="card-text text-muted mb-3">@vehicle.Model</p>
+                        <button class="btn btn-outline-danger w-100" @onclick="() => DeleteVehicle(vehicle.Id)">
+                            <i class="bi bi-trash3-fill"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="bi bi-emoji-frown display-1 text-muted mb-4"></i>
+        <h3>No hay vehículos registrados</h3>
+        <p class="text-muted">¡Comienza agregando tu primer vehículo!</p>
+        <button class="btn btn-primary mt-3" @onclick="MostrarFormulario">
+            <i class="bi bi-plus-circle-fill"></i> Agregar mi primer vehículo
+        </button>
+    </div>
+}
+
+@code {
+    private Vehicle newVehicle = new() { Year = DateTime.Now.Year };
+    private List<Vehicle> vehicles = new();
+    private bool isLoading = true;
+    private bool mostrarFormulario = false;
+    private bool formularioVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadVehicles();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadVehicles()
+    {
+        vehicles = await VehicleService.GetAll();
+        StateHasChanged();
+    }
+
+    private void MostrarFormulario()
+    {
+        mostrarFormulario = true;
+        Task.Delay(50).ContinueWith(_ => 
+        {
+            formularioVisible = true;
+            StateHasChanged();
+        });
+    }
+
+    private void OcultarFormulario()
+    {
+        formularioVisible = false;
+        Task.Delay(300).ContinueWith(_ => 
+        {
+            mostrarFormulario = false;
+            StateHasChanged();
+        });
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await VehicleService.Add(newVehicle);
+            newVehicle = new() { Year = DateTime.Now.Year };
+            await LoadVehicles();
+            OcultarFormulario();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al guardar el vehículo: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteVehicle(int id)
+    {
+        try
+        {
+            await VehicleService.Delete(id);
+            await LoadVehicles();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar el vehículo: {ex.Message}");
+        }
+    }
+} 
